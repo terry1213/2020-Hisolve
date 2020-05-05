@@ -17,6 +17,7 @@
 #my#
 hisolve/.settings
 hisolve/build
+hisolve/.metadata
 .DS_Store
 .classpath
 .project
