@@ -117,23 +117,31 @@
 	$('#nav').load("nav.jsp?userName=" + sessionStorage.getItem("userName"));
 	
 	$("#submit").click(function(){
-		$.ajax({
-	    	url:'save.jsp',
-	    	dataType:'text',
-	    	type:'POST',
-	    	data:{'data':document.getElementById('problemContent').value, 'fileName':'problemContent.txt', 'uploadPath':'<%=uploadPath%>'},
-	    	success : function(){
-	    		
-	        },
-	    	error : function(request,status,error){
-				console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-	    	}
-		});
-		document.getElementById('postData').method = "post";
-		document.getElementById('postData').action = "addTestCase.jsp"
-		document.getElementById('postData').submit();
-	
-	});
+	      var temp = $("#single").is(':checked');
+	      $.ajax({
+	          url:'save.jsp',
+	          dataType:'text',
+	          type:'POST',
+	          data:{'data':document.getElementById('problemContent').value, 'fileName':'problemContent.txt', 'uploadPath':'<%=uploadPath%>'},
+	          success : function(){
+	             
+	           },
+	          error : function(request,status,error){
+	            console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+	          }
+	      });
+	      if(temp){
+	            document.getElementById('postData').method = "post";
+	            document.getElementById('postData').action = "addTestCase.jsp"
+	            document.getElementById('postData').submit();
+	       }
+	       else{
+	            document.getElementById('postData').method = "post";
+	            document.getElementById('postData').action = "addBaseTar.jsp"
+	            document.getElementById('postData').submit();
+	       }
+	   
+	   });
 	
 
 	

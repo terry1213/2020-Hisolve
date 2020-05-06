@@ -84,15 +84,8 @@
 					<textarea name="problemContent" id="problemContent" style="resize: none;" class="form-control" readonly required><%=problemContent%></textarea>
 				</div>
 				<div class="form-group">
-					<button id="add" class="btn btn-info btn-sm">테스트 케이스 추가 +</button>
-					<button id="delete" class="btn btn-info btn-sm">삭제 -</button>
 					<button type="submit" class="btn btn-info btn-sm">등록</button>
 					<button onclick="history.back();" class="btn btn-info btn-sm">취소</button>
-				</div>
-				
-				<div class="input-group-prepend">
-    				<label class="input-group-text" for="problemContent">makefile:</label>
-					<input name="makefile" id="makefile" type="file" class="form-control" required>
 				</div>						
 				
 				<input name="uploadPath" id="uploadPath" type="hidden" required value="<%=uploadPath%>">
@@ -101,10 +94,6 @@
 							<div class="form-group">
 								<label for="programForm"><strong>뼈대 프로그램을 올려주세요.(문제 제출할 내용과 양식 그대로)</strong></label>
 							<input type="file" name="programForm" id="programForm" accept=".tar" class="form-control" required>
-							</div>
-							<div class="form-group">
-								<label for="testForm"><strong>Test 프로그램을 올려주세요.(build.sh, test.sh는 필수적으로 포함해야 됨)</strong></label>
-							<input type="file" name="testForm" id="testForm" accept=".tar" class="form-control" required>
 							</div>
 							<div style="display : none;">
                             	<input type="submit" id = "checker">

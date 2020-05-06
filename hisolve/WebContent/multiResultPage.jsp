@@ -32,7 +32,7 @@
 	if(userDAO.check(userID).equals("NO") && testing.equals("NO")){
 		
 		Date now = new Date();
-		SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd kk:mm");
 		upload_time = sf.format(now);
 		String sessionTime[] = new String[2];
 		sessionTime = sessionDAO.seeSessionTime(sessionID);
@@ -80,6 +80,8 @@
 			container = available[0];	// container 사용 가능한 것 하나 골라서 사용
 			resultDAO.changeState("BUSY",container);	//	container 상태를 바꿔줌
 		}
+		
+		int inputNum = 0;
 	    
 		int count = 0;
 		int check = 0;
@@ -87,9 +89,8 @@
 		String line = "";
 	    String command[] = {"/usr/local/bin/docker exec -w /home/ " + container + " mkdir " + userID,
 				"/usr/local/bin/docker cp " + uploadPath + "/" + fileName + " "+ container +":/home/" + userID,
-				"/usr/local/bin/docker exec -w /home/ "+ container +" /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + fileName + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?",
+				"/usr/local/bin/docker exec -w /home/ "+ container +" /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + test[count] + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?",
 				"/usr/local/bin/docker exec -w /home/ "+ container +" rm -r " + userID,
-				"rm -r " + uploadPath + "/userAnswer",
 				"rm " + uploadPath + "/error.txt",
 				"rm " + uploadPath + "/" + fileName};
 
@@ -130,25 +131,16 @@
 	   				}
 	   				line = sb.toString();
 	   				test = line.split(" ");
+	   				inputNum = test.length;
 	   			}
 	   			
 	   			if(i == 2){
 	   				if((line = br.readLine()) != null){
 	   					switch(line){
 	   						case "0":	//정상 종료
-	   							
-	   							BufferedReader br1 =
-	   				    	 			new BufferedReader(
-	   				    	 					new InputStreamReader(
-	   				    	 							new SequenceInputStream(ps.getInputStream(), ps.getErrorStream())));
 	   							count += 1;
-	   							if((line = br1.readLine()) != null){
-	   								message += String.valueOf(count) + "번: 틀렸습니다.\n";
-	   			          		}
-	   			         	 	else{
-	   			         	 		message += String.valueOf(count) + "번: 정답입니다!\n";
-	   			         	 		correct += 1;
-	   			         	 	}
+	   			         	 	message += String.valueOf(count) + "번: 정답입니다!\n";
+	   			         	 	correct += 1;
 	   							if(testing.equals("YES") || count == 1){					
 	   								if(testing.equals("YES")){
 		   								message += "\n정답:\n";
@@ -175,7 +167,37 @@
 	   								userAnswerReader.close();
 	   							}
 	   							break;
-	   						case "1":	//컴파일 에러
+	   						case "1":
+	   							count += 1;
+	   							message += String.valueOf(count) + "번: 틀렸습니다.\n";
+	   							if(testing.equals("YES") || count == 1){					
+	   								if(testing.equals("YES")){
+		   								message += "\n정답:\n";
+		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/output/output" + String.valueOf(count-1) + ".txt"));
+		   					            StringBuilder answerSB = new StringBuilder();
+		   					            String line2;
+
+		   					            while((line2 = answerReader.readLine())!= null){
+		   					            	answerSB.append(line2+"\n");
+		   					            }
+		   								message += answerSB.toString();
+		   								answerReader.close();
+	   								}
+	   								
+	   								message += "\n코드 결과:\n";
+	   					            BufferedReader userAnswerReader = new BufferedReader(new FileReader(uploadPath + "/userAnswer/userAnswer" + String.valueOf(count-1) + ".txt"));
+	   					            StringBuilder userAnswerSB = new StringBuilder();
+	   					            String line3;
+
+	   					            while((line3 = userAnswerReader.readLine())!= null){
+	   					            	userAnswerSB.append(line3+"\n");
+	   					            }
+	   								message += userAnswerSB.toString() + "\n";
+	   								userAnswerReader.close();
+	   							}
+	   							break;
+	   							
+	   						case "-1":	//컴파일 에러
 	   							message += "컴파일 에러!\n\n";
 	   							code_result = "compile";
 	   							ps  = rt.exec("/usr/local/bin/docker cp " + container + ":/home/" + userID + "/error.txt " + uploadPath);
@@ -200,9 +222,9 @@
 	   							break;
 	   					}
 	   					if(check == 0){
-	   						if(count < Integer.valueOf(inputNum.trim())){
+	   						if(count < inputNum){
 		    					i -= 1;
-		    					command[2] = "/usr/local/bin/docker exec -w /home/ " + container + " /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + fileName + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?";
+		    					command[2] = "/usr/local/bin/docker exec -w /home/ " + container + " /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + test[count] + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?";
 		    				}
 	   					}
 	   					continue;
@@ -212,7 +234,7 @@
 	    		if(i == 5){
 	    			String authority = userDAO.check(userID);
 	    			if(authority.equals("YES")){
-	    				if(correct == Integer.valueOf(inputNum.trim())){
+	    				if(correct == inputNum){
 	    					if(testing.equals("NO")){
 	        					int check1 = problemDAO.insertProblem(userID, problemName, timeLimit, problemContent, type);
 	            				File f1 = new File(uploadPath);
@@ -226,7 +248,7 @@
 	    				if(testing.equals("YES")){
 	    					/* break; */
 	    				}
-	    				else if(correct == Integer.valueOf(inputNum.trim())){		
+	    				else if(correct == inputNum){		
 	    					int result = resultDAO.result(userID, sessionID, problemID, code,"correct");
 	    					resultDAO.resultTime(String.valueOf(result), upload_time);
 	    					/* break; */

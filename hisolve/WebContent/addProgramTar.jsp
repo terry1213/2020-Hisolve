@@ -34,6 +34,7 @@
 			}
 			if(str.substring(str.length()-3,str.length()).equals(".sh") && str.substring(0,4).equals("test")){
 				shList[listsize2] = str;
+				listsize2++;
 			}
 		}
 	}

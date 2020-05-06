@@ -5,6 +5,10 @@ String name = request.getParameter("name");
 String userID = request.getParameter("userID");
 String uploadPath = request.getSession().getServletContext().getRealPath("/upload") + '/' + userID + "/problem/test";
 
+if(name.equals("testForm")){
+	uploadPath += "/build";
+}
+
 try {
 	MultipartRequest multi = new MultipartRequest(
 			request, 
