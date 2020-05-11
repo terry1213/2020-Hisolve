@@ -81,15 +81,26 @@
 			resultDAO.changeState("BUSY",container);	//	container 상태를 바꿔줌
 		}
 		
-		int inputNum = 0;
+		String[] getInputNum = {"/bin/sh", "-c", "ls -l " + txtPath + "/input | grep ^- | wc -l"};
+		String inputNum = "";
+	    try{
+			ps = rt.exec(getInputNum);
+		}
+		finally{
+			BufferedReader br =
+		 			new BufferedReader(
+		 					new InputStreamReader(
+		 							new SequenceInputStream(ps.getInputStream(), ps.getErrorStream())));
+			inputNum = br.readLine();
+		}
 	    
 		int count = 0;
 		int check = 0;
-		String[] test = null;
+		
 		String line = "";
 	    String command[] = {"/usr/local/bin/docker exec -w /home/ " + container + " mkdir " + userID,
 				"/usr/local/bin/docker cp " + uploadPath + "/" + fileName + " "+ container +":/home/" + userID,
-				"/usr/local/bin/docker exec -w /home/ "+ container +" /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + test[count] + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?",
+				"/usr/local/bin/docker exec -w /home/ "+ container +" /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + fileName + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?",
 				"/usr/local/bin/docker exec -w /home/ "+ container +" rm -r " + userID,
 				"rm " + uploadPath + "/error.txt",
 				"rm " + uploadPath + "/" + fileName};
@@ -114,24 +125,8 @@
 	   			if(i == 1){
 	   				ps = rt.exec("/usr/local/bin/docker exec -w /home/" + userID + " "+ container + " tar -xvf " + fileName);
 	   				ps.waitFor();
-	   				ps = rt.exec("/usr/local/bin/docker exec -w /home/" + userID + " "+ container + " find . -maxdepth 1 -name *.sh");
+	   				ps = rt.exec("/usr/local/bin/docker cp " + txtPath + "/input " + container +":/home/" + userID);
 	   				ps.waitFor();
-	   				
-	   				BufferedReader br1 =
-			    	 			new BufferedReader(
-			    	 					new InputStreamReader(
-			    	 							new SequenceInputStream(ps.getInputStream(), ps.getErrorStream())));
-	   				StringBuffer sb = new StringBuffer();
-	   				
-	   				while((line = br1.readLine()) != null){
-	   					if(!line.equals("./build.sh")){
-	   						sb.append(line);
-		   					sb.append(" ");
-	   					}
-	   				}
-	   				line = sb.toString();
-	   				test = line.split(" ");
-	   				inputNum = test.length;
 	   			}
 	   			
 	   			if(i == 2){
@@ -144,7 +139,7 @@
 	   							if(testing.equals("YES") || count == 1){					
 	   								if(testing.equals("YES")){
 		   								message += "\n정답:\n";
-		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/output/output" + String.valueOf(count-1) + ".txt"));
+		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/input/input" + String.valueOf(count-1) + ".txt"));
 		   					            StringBuilder answerSB = new StringBuilder();
 		   					            String line2;
 
@@ -156,15 +151,7 @@
 	   								}
 	   								
 	   								message += "\n코드 결과:\n";
-	   					            BufferedReader userAnswerReader = new BufferedReader(new FileReader(uploadPath + "/userAnswer/userAnswer" + String.valueOf(count-1) + ".txt"));
-	   					            StringBuilder userAnswerSB = new StringBuilder();
-	   					            String line3;
-
-	   					            while((line3 = userAnswerReader.readLine())!= null){
-	   					            	userAnswerSB.append(line3+"\n");
-	   					            }
-	   								message += userAnswerSB.toString() + "\n";
-	   								userAnswerReader.close();
+	   								message += "Test Command " + String.valueOf(count) + "번: 정답입니다!\n";
 	   							}
 	   							break;
 	   						case "1":
@@ -173,7 +160,7 @@
 	   							if(testing.equals("YES") || count == 1){					
 	   								if(testing.equals("YES")){
 		   								message += "\n정답:\n";
-		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/output/output" + String.valueOf(count-1) + ".txt"));
+		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/input/input" + String.valueOf(count-1) + ".txt"));
 		   					            StringBuilder answerSB = new StringBuilder();
 		   					            String line2;
 
@@ -185,15 +172,7 @@
 	   								}
 	   								
 	   								message += "\n코드 결과:\n";
-	   					            BufferedReader userAnswerReader = new BufferedReader(new FileReader(uploadPath + "/userAnswer/userAnswer" + String.valueOf(count-1) + ".txt"));
-	   					            StringBuilder userAnswerSB = new StringBuilder();
-	   					            String line3;
-
-	   					            while((line3 = userAnswerReader.readLine())!= null){
-	   					            	userAnswerSB.append(line3+"\n");
-	   					            }
-	   								message += userAnswerSB.toString() + "\n";
-	   								userAnswerReader.close();
+	   								message += "Test Command " + String.valueOf(count) + "번: 틀렸습니다.\n";
 	   							}
 	   							break;
 	   							
@@ -212,19 +191,11 @@
 	   			    	        fileReader.close();
 	   			    	        check = 1;
 	   							break;
-	   						case "124":
-	   							count += 1;
-	   							message += String.valueOf(count) + "번: 타임아웃!\n";;	//타임아웃
-	   							break;
-	   						case "139":
-	   							count += 1;
-	   							message += String.valueOf(count) + "번: 세그멘테이션 오류!\n";	//세그멘테이션 오류
-	   							break;
 	   					}
 	   					if(check == 0){
-	   						if(count < inputNum){
+	   						if(count < Integer.valueOf(inputNum.trim())){
 		    					i -= 1;
-		    					command[2] = "/usr/local/bin/docker exec -w /home/ " + container + " /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + test[count] + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?";
+		    					command[2] = "/usr/local/bin/docker exec -w /home/ " + container + " /bin/bash -c 'ulimit -Su 100 ; python container.py " + userID + " " + fileName + " " + String.valueOf(count) + " " + timeLimit + " " + type + "' ; echo $?";
 		    				}
 	   					}
 	   					continue;
@@ -234,7 +205,7 @@
 	    		if(i == 5){
 	    			String authority = userDAO.check(userID);
 	    			if(authority.equals("YES")){
-	    				if(correct == inputNum){
+	    				if(correct == Integer.valueOf(inputNum.trim())){
 	    					if(testing.equals("NO")){
 	        					int check1 = problemDAO.insertProblem(userID, problemName, timeLimit, problemContent, type);
 	            				File f1 = new File(uploadPath);
@@ -248,7 +219,7 @@
 	    				if(testing.equals("YES")){
 	    					/* break; */
 	    				}
-	    				else if(correct == inputNum){		
+	    				else if(correct == Integer.valueOf(inputNum.trim())){		
 	    					int result = resultDAO.result(userID, sessionID, problemID, code,"correct");
 	    					resultDAO.resultTime(String.valueOf(result), upload_time);
 	    					/* break; */

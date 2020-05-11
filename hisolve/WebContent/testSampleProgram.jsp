@@ -18,7 +18,7 @@
 <body>
 
 	<script>
-		if(sessionStorage.getItem("allowed")!="addSampleProgram.jsp"){
+		if(sessionStorage.getItem("allowed")!="addSampleProgram.jsp" && sessionStorage.getItem("allowed")!="addProgramTar.jsp"){
 			alert("잘못된 접근입니다.");
 			history.back();
 		}

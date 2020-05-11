@@ -22,7 +22,6 @@
    File dir = new File(uploadPath);
    File[] fileList = dir.listFiles();
    String[] nameList = new String[fileList.length];
-   String[] shList = new String[fileList.length];
    
 	for(int i = 0 ; i < fileList.length ; i++){
 		File file = fileList[i];
@@ -31,10 +30,6 @@
 			if(str.substring(str.length()-2,str.length()).equals(".c") || str.substring(str.length()-2,str.length()).equals(".h")){
 				nameList[listsize] = str;
 				listsize++;
-			}
-			if(str.substring(str.length()-3,str.length()).equals(".sh") && str.substring(0,4).equals("test")){
-				shList[listsize2] = str;
-				listsize2++;
 			}
 		}
 	}
@@ -109,6 +104,25 @@
 				<textarea name="result" id="result" style="display:none" readonly required></textarea>
 				<input name="uploadPath" id="uploadPath" type="hidden" required value="<%=uploadPath%>">
 				<input name="problemNum" id="problemNum" type="hidden" value="<%=problemNum%>">
+				
+				<h5>테스트 명령어 등록하기 (최대 20개)</h5><br>
+				<div class="form-group">
+					<button id="add" class="btn btn-info btn-sm"> 추가 +</button>
+					<button id="delete" class="btn btn-info btn-sm">삭제 -</button>
+				</div>
+				
+				<div class="input-group mb-3">
+						<input name="inputNum" id="inputNum" type="hidden" value="1" class="form-control" readonly required>
+				</div>
+				
+				<div class="row" id="testCase1">
+					<div class="input-group mb-3 col-md-6" style="float: left; padding: 10px 0px 0px 0px;">
+						<div class="input-group-prepend">
+    						<label style="font-size: 12px;" class="input-group-text" for="input1">Command 1:</label>
+  						</div>
+  						<textarea id ="input1" required></textarea>
+					</div>
+				</div>
 			</form>
 			
 			<form id = "checkBoxData">
@@ -122,21 +136,9 @@
 				%>
 			</form>
 			
-			<form id = "testData">
-				<p>테스트에 사용할 test.sh파일을 체크하세요</p>
-				<% 
-					for(int i=0;i<listsize2;i++){
-				%> 
-					<label><input type="checkbox" name="testNum<%=i%>" value="<%=shList[i]%>"> <%=shList[i]%></label>
-				<% 
-					}
-				%>
-			</form>
-
-			
 			<form method="post" enctype="multipart/form-data" id="fileData">
 				<div class="form-group">
-                     <label for="sampleProgram"><strong><%=inputNum%>개의 테스트 케이스에 대한 샘플 프로그램을 올려주세요. (뼈대만 있는 파일을 대신할 파일들을 tar 형식으로 묶어서 제출하세요)</strong></label>
+                     <label for="sampleProgram"><strong>테스트 케이스에 대한 샘플 프로그램을 올려주세요. (뼈대만 있는 파일을 대신할 파일들을 tar 형식으로 묶어서 제출하세요)</strong></label>
                     <input type="file" name="sampleProgram" id="sampleProgram" accept=".tar" class="form-control" required>
                  </div>
               </form>
@@ -151,10 +153,61 @@
 <script>
 $('#nav').load("nav.jsp?userName=" + sessionStorage.getItem("userName"));
 
+var x = 2;
+$(document).ready(function() {
+    var max_fields = 20;
+    var add_button = $("#add");
+
+    $(add_button).click(function(e) {
+        e.preventDefault();
+        if (x <= max_fields) {
+        	$("#postData").append('<div class="row" id="testCase' + x + '"><div class="input-group mb-3 col-md-6" style="float: left; padding: 10px 0px 0px 0px;"><div class="input-group-prepend"><label style="font-size: 12px;" class="input-group-text" for="input' + x + '">Command ' + x + ':</label></div><textarea id = "input' + x + '" requried></textarea></div></div>');
+            $("#inputNum").val(x);
+            $("#inputNum").load(document.URL + " #inputNum");
+        	x++;
+        } else {
+            alert('최대 Command 수 입니다!')
+        }
+    });
+    
+    $("#postData").on("click", "#delete", function(e) {
+        e.preventDefault();
+        if(x > 2){
+            x--;
+            $('#testCase'+ x).remove();
+            $("#inputNum").val(x-1);
+            $("#inputNum").load(document.URL + " #inputNum");
+        }
+    })
+});
+
+function save(txtType, j){
+	var content = document.getElementById(txtType+j).value;
+	if (content) {
+    		$.ajax({
+    	    	url:'save.jsp',
+    	    	dataType:'text',
+    	    	type:'POST',
+    	    	data:{'data':content, 'fileName':txtType + (j-1) + '.txt', 'uploadPath':'<%=uploadPath%>/' + txtType},
+    	    	success : function(){
+    	    		delay(100);
+    	        },
+    	    	error : function(request,status,error){
+    				console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+    	    	}
+    		});
+
+	}
+}
+
 var content = "";
 $("#test").click(function(){
+	
+	for(var i = 1; i < x; i++){
+		save('input', i);
+	}
+	
 	var testList = new Array();
-	var chosen = 0;
 	
 	for(var i=0;i<<%=listsize%>;i++){
         var name = "fileNum" + i;
@@ -171,15 +224,6 @@ $("#test").click(function(){
                         console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
         }
                 });
-        });
-	}
-	
-	for(var i=0;i<<%=listsize2%>;i++){
-        var name = "testNum" + i;
-        $("input[name="+name+"]:checked").each(function(){
-                var sh = $(this).val();
-                testList[chosen] = sh;
-                chosen++;
         });
 	}
 	
@@ -206,13 +250,13 @@ $("#test").click(function(){
                     	    	dataType:'text',
                     	    	type:'POST',
                     	    	traditional : true,
-                    	    	data:{'uploadPath':'<%=uploadPath%>', 'test': testList},
+                    	    	data:{'uploadPath':'<%=uploadPath%>'},
                     	    	success : function(){
                     	    		$.ajax({
                             	    	url:'multiResultPage.jsp',
                             	    	dataType:'text',
                             	    	type:'POST',
-                            	    	data:{'uploadPath':'<%=uploadPath%>', 'txtPath':'<%=uploadPath%>', 'fileName':"sampleProgram.tar", 'userID': sessionStorage.getItem("userID"), 'timeLimit': '<%=timeLimit%>', 'problemName': '<%=problemName%>', 'problemContent': '<%=problemContent%>', 'type': '<%=type%>', 'testing':'NO'},
+                            	    	data:{'uploadPath':'<%=uploadPath%>', 'txtPath':'<%=uploadPath%>', 'fileName':"finalProgram.tar", 'userID': sessionStorage.getItem("userID"), 'timeLimit': '<%=timeLimit%>', 'problemName': '<%=problemName%>', 'problemContent': '<%=problemContent%>', 'type': '<%=type%>', 'testing':'NO'},
                             	    	success : function(data){
                             	            $('#result').val(data);
                             	            $('#userID').val(sessionStorage.getItem("userID"));
@@ -242,6 +286,15 @@ $("#test").click(function(){
 	}
 	
 });
+
+function delay(gap){
+    var then,now; 
+then=new Date().getTime(); 
+now=then; 
+while((now-then)<gap){ 
+now=new Date().getTime();  
+}
+}
 
 </script>
 </body>

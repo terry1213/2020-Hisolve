@@ -11,6 +11,12 @@
 		}
 	}
 	
+	File f2 = new File(uploadPath + "/input");
+	if(!f2.exists()){
+	if(f2.mkdirs()){
+		}
+	}
+	
 	String problemName = request.getParameter("problemName");
 	String timeLimit = request.getParameter("timeLimit");
 	String problemContent = request.getParameter("problemContent");
@@ -84,6 +90,8 @@
 					<textarea name="problemContent" id="problemContent" style="resize: none;" class="form-control" readonly required><%=problemContent%></textarea>
 				</div>
 				<div class="form-group">
+					<button id="add" class="btn btn-info btn-sm">테스트 케이스 추가 +</button>
+					<button id="delete" class="btn btn-info btn-sm">삭제 -</button>
 					<button type="submit" class="btn btn-info btn-sm">등록</button>
 					<button onclick="history.back();" class="btn btn-info btn-sm">취소</button>
 				</div>						
