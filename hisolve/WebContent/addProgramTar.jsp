@@ -125,7 +125,7 @@
 				</div>
 			</form>
 			
-			<form id = "checkBoxData">
+			<form id = "requiredFile">
 				<p>뼈대파일을 체크하세요</p>
 				<% 
 					for(int i=0;i<listsize;i++){
@@ -238,6 +238,11 @@ $("#test").click(function(){
      		var form = $('#fileData')[0];
             var formData = new FormData(form);
 
+            var checkBoxArr = [];
+            $("#requiredFile input:checked").each(function(i){
+            	checkBoxArr.push($(this).val());
+            });
+
             $.ajax({
                 url: "uploadTar.jsp?userID=" + sessionStorage.getItem('userID')+"&name="+temp,
                         processData: false,
@@ -256,13 +261,14 @@ $("#test").click(function(){
                             	    	url:'multiResultPage.jsp',
                             	    	dataType:'text',
                             	    	type:'POST',
-                            	    	data:{'uploadPath':'<%=uploadPath%>', 'txtPath':'<%=uploadPath%>', 'fileName':"finalProgram.tar", 'userID': sessionStorage.getItem("userID"), 'timeLimit': '<%=timeLimit%>', 'problemName': '<%=problemName%>', 'problemContent': '<%=problemContent%>', 'type': '<%=type%>', 'testing':'NO'},
+                            	    	data:{'uploadPath':'<%=uploadPath%>', 'txtPath':'<%=uploadPath%>', 'fileName':"finalProgram.tar", 'userID': sessionStorage.getItem("userID"), 'timeLimit': '<%=timeLimit%>', 'problemName': '<%=problemName%>', 'problemContent': '<%=problemContent%>', 'type': '<%=type%>', 'testing':'NO', 'requiredFileName':checkBoxArr},
                             	    	success : function(data){
                             	            $('#result').val(data);
                             	            $('#userID').val(sessionStorage.getItem("userID"));
                              	     		document.getElementById('postData').method = "post";
                             	    		document.getElementById('postData').action = "testSampleProgram.jsp"
                             	    		document.getElementById('postData').submit();
+                            	    		alert(data);
                             	        },
                             	    	error : function(request,status,error){
                             				console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);

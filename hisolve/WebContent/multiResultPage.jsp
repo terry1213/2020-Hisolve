@@ -14,6 +14,8 @@
 	String code = request.getParameter("code");
 	String type = request.getParameter("type");
 	String testing = request.getParameter("testing");
+	String requiredFileName[] = request.getParameterValues("requiredFileName[]");
+	String requiredFileResult[] = request.getParameterValues("requiredFileResult[]");
 	
 	ResultDAO resultDAO = new ResultDAO();
 	UserDAO userDAO = new UserDAO();
@@ -208,6 +210,11 @@
 	    				if(correct == Integer.valueOf(inputNum.trim())){
 	    					if(testing.equals("NO")){
 	        					int check1 = problemDAO.insertProblem(userID, problemName, timeLimit, problemContent, type);
+	        					
+	        					for(int j = 0; j < requiredFileName.length; j++){
+	        						check1 = problemDAO.requiredFile(problemID, requiredFileName[j]);
+	        					}
+	        					
 	            				File f1 = new File(uploadPath);
 	        					File f2 = new File(request.getSession().getServletContext().getRealPath("/upload") + "/problem/" + check1);
 	        					f1.renameTo(f2);
@@ -222,6 +229,9 @@
 	    				else if(correct == Integer.valueOf(inputNum.trim())){		
 	    					int result = resultDAO.result(userID, sessionID, problemID, code,"correct");
 	    					resultDAO.resultTime(String.valueOf(result), upload_time);
+	    					for(int j = 0; j < requiredFileResult.length; j++){
+        						int check1 = resultDAO.requiredFileResult(problemID, String.valueOf(result), requiredFileName[j], requiredFileResult[j]);
+        					}
 	    					/* break; */
 	    				}
 	    				else{
@@ -233,6 +243,9 @@
 	    						result = resultDAO.result(userID, sessionID, problemID, code,"wrong");
 	    					}
 	    					resultDAO.resultTime(String.valueOf(result), upload_time);
+	    					for(int j = 0; j < requiredFileResult.length; j++){
+        						int check1 = resultDAO.requiredFileResult(problemID, String.valueOf(result), requiredFileName[j], requiredFileResult[j]);
+        					}
 	    					/* break; */
 	    				}
 	    			}

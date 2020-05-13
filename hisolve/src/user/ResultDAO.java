@@ -55,6 +55,21 @@ public class ResultDAO {
 	      return -1;
 	   }
    
+	public int requiredFileResult(String problemID, String resultID, String fileName, String code) {
+	      String SQL = "INSERT INTO REQUIREDFILERESULT VALUES(?,?,?,?)";
+	      try {
+	         pstmt = conn.prepareStatement(SQL);
+	         pstmt.setString(1, problemID);
+	         pstmt.setString(2, resultID);
+	         pstmt.setString(3, fileName);
+	         pstmt.setString(4, code);
+	         return pstmt.executeUpdate();
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
+	      return -1;
+	   }
+	
 	public int howmany(String userID, String sessionID, String problemID) {
 	      String SQL = "SELECT COUNT(resultID) FROM RESULT WHERE userID = ? AND sessionID = ? AND problemID = ?";
 	      try {

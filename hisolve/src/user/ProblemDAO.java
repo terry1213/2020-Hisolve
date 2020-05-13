@@ -44,6 +44,19 @@ public class ProblemDAO {
 	      return -1;
 	   }
    
+   public int requiredFile(String problemID, String fileName) {
+	      String SQL = "INSERT INTO REQUIREDFILE VALUES(?,?)";
+	      try {
+	         pstmt = conn.prepareStatement(SQL);
+	         pstmt.setString(1, problemID);
+	         pstmt.setString(2, fileName);
+	         return pstmt.executeUpdate();
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
+	      return -1;
+	   }
+   
    public int deleteProblem(int problemID) {
 	      String SQL = "DELETE FROM PROBLEM WHERE problemID=?";
 	      try {
