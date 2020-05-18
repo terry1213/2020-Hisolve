@@ -280,7 +280,7 @@ public class SessionDAO {
 	
 	public String[] seeproblem(int problemID) {
 	      String SQL = "SELECT * FROM PROBLEM WHERE problemID = ?";
-	      String temp[] = new String[4];
+	      String temp[] = new String[6];
 	      try {
 	         pstmt = conn.prepareStatement(SQL);
 	         pstmt.setInt(1, problemID);
@@ -291,6 +291,8 @@ public class SessionDAO {
 	        	 temp[1] = rs.getString(2);
 	        	 temp[2] = rs.getString(3);
 	        	 temp[3] = rs.getString(4);
+	        	 temp[4] = rs.getString(5);
+	        	 temp[5] = rs.getString(6);
 	         }
 	         return temp;
 	      } catch (Exception e) {

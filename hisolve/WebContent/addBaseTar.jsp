@@ -90,9 +90,7 @@
 					<textarea name="problemContent" id="problemContent" style="resize: none;" class="form-control" readonly required><%=problemContent%></textarea>
 				</div>
 				<div class="form-group">
-					<button id="add" class="btn btn-info btn-sm">테스트 케이스 추가 +</button>
-					<button id="delete" class="btn btn-info btn-sm">삭제 -</button>
-					<button type="submit" class="btn btn-info btn-sm">등록</button>
+					<button type="button" onclick="multi();" class="btn btn-info btn-sm">등록</button>
 					<button onclick="history.back();" class="btn btn-info btn-sm">취소</button>
 				</div>						
 				
@@ -126,16 +124,19 @@
 $('#nav').load("nav.jsp?userName=" + sessionStorage.getItem("userName"));
 
 function multi(){
-		document.getElementById("checker").click();     
+		
 	    var fileCheck = document.getElementById("programForm").value;
 	    if(!fileCheck){
+	    		document.getElementById("checker").click();     
 	            return false;
 	    }
-	    document.getElementById("checker2").click();
+	    
 	    var fileCheck2 = document.getElementById("testForm").value;
 	    if(!fileCheck2){
+	    		document.getElementById("checker2").click();
 	            return false;
 	    }
+	    
 	    
 		var codefile = document.getElementById("programForm").files[0];
 		if (codefile) {
@@ -186,6 +187,15 @@ function multi(){
 	                        data: formData,
 	                        type: 'POST',
 	                        success: function(data){
+	                        	var i = document.createElement("input");
+	                        	i.setAttribute("type","hidden");
+	                        	i.setAttribute("name","userID");
+	                        	i.setAttribute("value",sessionStorage.getItem("userID"));
+	                        	document.getElementById('postData').appendChild(i);
+	                        	
+	                        	document.getElementById('postData').method = "post";
+	                        	document.getElementById('postData').action = "addProgramTar.jsp"
+	                        	document.getElementById('postData').submit();
 	                        },
 	            			error : function(request,status,error){
 	    						console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
@@ -196,25 +206,9 @@ function multi(){
 	    		alert("파일을 읽는데 에러가 발생했습니다.");
 	    	}
 		}
+		
+		return true;
 }
-
-$("#postData").submit(function(e){
-
-	if(multi() == false){
-		return false;
-	}
-	
-	var i = document.createElement("input");
-	i.setAttribute("type","hidden");
-	i.setAttribute("name","userID");
-	i.setAttribute("value",sessionStorage.getItem("userID"));
-	document.getElementById('postData').appendChild(i);
-	
-	document.getElementById('postData').method = "post";
-	document.getElementById('postData').action = "addProgramTar.jsp"
-	//document.getElementById('postData').submit();
-
-});
 
 </script>
 </body>

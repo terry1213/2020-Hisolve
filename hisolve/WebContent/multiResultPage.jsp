@@ -2,7 +2,7 @@
     pageEncoding="UTF-8" import= "java.io.*, java.util.*, java.text.SimpleDateFormat, user.ResultDAO, user.UserDAO, user.ProblemDAO, user.SessionDAO"%><%	
 	int correct = 0;
 	String fin="";
-	String uploadPath = request.getParameter("uploadPath");
+	String copyPath = request.getParameter("uploadPath");
 	String txtPath = request.getParameter("txtPath");
 	String fileName = request.getParameter("fileName");
 	String userID = request.getParameter("userID");
@@ -26,7 +26,11 @@
 	int timeover = 0;
 	String upload_time = "";
 	String code_result = "correct";
-	uploadPath += "/build";
+
+	String uploadPath = copyPath;
+	if(userDAO.check(userID).equals("YES") && testing.equals("NO")){
+		uploadPath += "/build";
+	}
 	
 	Runtime rt = Runtime.getRuntime();
     Process ps = null;
@@ -129,6 +133,14 @@
 	   				ps.waitFor();
 	   				ps = rt.exec("/usr/local/bin/docker cp " + txtPath + "/input " + container +":/home/" + userID);
 	   				ps.waitFor();
+	   				if(userDAO.check(userID).equals("NO")){
+	   					ps = rt.exec("/usr/local/bin/docker cp " + txtPath + "/testForm.tar " + container +":/home/" + userID);
+		   				ps.waitFor();
+	   					ps = rt.exec("/usr/local/bin/docker exec -w /home/" + userID + " "+ container + " tar -xvf testForm.tar");
+		   				ps.waitFor();
+		   				ps = rt.exec("/usr/local/bin/docker exec -w /home/" + userID + " "+ container + " chmod +x *.sh");
+		   				ps.waitFor();
+	   				}
 	   			}
 	   			
 	   			if(i == 2){
@@ -138,7 +150,7 @@
 	   							count += 1;
 	   			         	 	message += String.valueOf(count) + "번: 정답입니다!\n";
 	   			         	 	correct += 1;
-	   							if(testing.equals("YES") || count == 1){					
+	   							/* if(testing.equals("YES") || count == 1){					
 	   								if(testing.equals("YES")){
 		   								message += "\n정답:\n";
 		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/input/input" + String.valueOf(count-1) + ".txt"));
@@ -154,12 +166,12 @@
 	   								
 	   								message += "\n코드 결과:\n";
 	   								message += "Test Command " + String.valueOf(count) + "번: 정답입니다!\n";
-	   							}
+	   							} */
 	   							break;
 	   						case "1":
 	   							count += 1;
 	   							message += String.valueOf(count) + "번: 틀렸습니다.\n";
-	   							if(testing.equals("YES") || count == 1){					
+/* 	   							if(testing.equals("YES") || count == 1){					
 	   								if(testing.equals("YES")){
 		   								message += "\n정답:\n";
 		   					            BufferedReader answerReader = new BufferedReader(new FileReader(txtPath + "/input/input" + String.valueOf(count-1) + ".txt"));
@@ -175,7 +187,7 @@
 	   								
 	   								message += "\n코드 결과:\n";
 	   								message += "Test Command " + String.valueOf(count) + "번: 틀렸습니다.\n";
-	   							}
+	   							} */
 	   							break;
 	   							
 	   						case "-1":	//컴파일 에러
@@ -212,10 +224,38 @@
 	        					int check1 = problemDAO.insertProblem(userID, problemName, timeLimit, problemContent, type);
 	        					
 	        					for(int j = 0; j < requiredFileName.length; j++){
-	        						check1 = problemDAO.requiredFile(problemID, requiredFileName[j]);
+	        						int check2 = problemDAO.requiredFile(String.valueOf(check1), requiredFileName[j]);
 	        					}
 	        					
-	            				File f1 = new File(uploadPath);
+	        					class Directory{
+	        						public Directory(){}
+	        						public boolean deleteAll(File dir) {
+	        							if (!dir.exists()) {
+	        								return true;
+	        							}
+	        							boolean res = true;
+	        							if (dir.isDirectory()) {
+	        								File[] files = dir.listFiles();
+	        								for (int i = 0; i < files.length; i++) {
+	        								res &= deleteAll(files[i]);
+	        								}
+	        							}
+	        							else {
+	        								res = dir.delete();
+	        							}
+	        							dir.delete();
+	        							return res;
+	        						}
+	        					}
+	        					
+	        					Directory d = new Directory();
+
+	        					File f0 = new File(uploadPath);
+	        					if(f0.exists()){
+	        						d.deleteAll(f0);
+	        					}
+	        					
+	            				File f1 = new File(copyPath);
 	        					File f2 = new File(request.getSession().getServletContext().getRealPath("/upload") + "/problem/" + check1);
 	        					f1.renameTo(f2);
 	        					break;
@@ -227,7 +267,7 @@
 	    					/* break; */
 	    				}
 	    				else if(correct == Integer.valueOf(inputNum.trim())){		
-	    					int result = resultDAO.result(userID, sessionID, problemID, code,"correct");
+	    					int result = resultDAO.result(userID, sessionID, problemID, "multi","correct");
 	    					resultDAO.resultTime(String.valueOf(result), upload_time);
 	    					for(int j = 0; j < requiredFileResult.length; j++){
         						int check1 = resultDAO.requiredFileResult(problemID, String.valueOf(result), requiredFileName[j], requiredFileResult[j]);
@@ -237,10 +277,10 @@
 	    				else{
 	    					int result = 0;
 	    					if(code_result == "compile"){
-	    						result = resultDAO.result(userID, sessionID, problemID, code,"compile");
+	    						result = resultDAO.result(userID, sessionID, problemID, "multi","compile");
 	    					}
 	    					else{
-	    						result = resultDAO.result(userID, sessionID, problemID, code,"wrong");
+	    						result = resultDAO.result(userID, sessionID, problemID, "multi","wrong");
 	    					}
 	    					resultDAO.resultTime(String.valueOf(result), upload_time);
 	    					for(int j = 0; j < requiredFileResult.length; j++){
