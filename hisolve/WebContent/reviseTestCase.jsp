@@ -33,6 +33,9 @@
 			sessionStorage.setItem("allowed", "reviseTestCase.jsp");
 		}
 	</script>
+	
+<div id="nav" name="nav">
+</div>
 
 <div class="container">
 	<div class="row">
@@ -81,7 +84,6 @@
 				<div id="buttons" class="form-group" style="display:none;">
 					<button id="add" class="btn btn-info btn-sm">테스트 케이스 추가 +</button>
 					<button id="delete" class="btn btn-info btn-sm">삭제 -</button>
-					<button id="reviseMakefile" class="btn btn-info btn-sm">makefile 수정</button>
 					<button id="submit" class="btn btn-info btn-sm">등록</button>
 				</div>
 				
@@ -102,7 +104,7 @@
 
 
 <script>
-var makefile = 0;
+$('#nav').load("nav.jsp?userName=" + sessionStorage.getItem("userName"));
 
 var x = document.getElementById("inputNum").value;
 $("#inputNum").load(document.URL + " #inputNum");
@@ -145,31 +147,9 @@ $(document).ready(function() {
         }
     })
     
-    $("#reviseMakefile").click(function(e) {
-    	makefile = 1;
-    	document.getElementById("reviseMakefile").style.display = "none";
-        e.preventDefault();
-    	$.ajax({
-        	url:'delete.jsp',
-        	dataType:'text',
-        	type:'POST',
-        	data:{'fileName': 'Makefile', 'deletePath':"<%=uploadPath%>"},
-        	success : function(){
-        		$("#postData").append('<div class="input-group-prepend"><label class="input-group-text" for="problemContent">makefile:</label><input name="makefile" id="makefile" type="file" class="form-control" required></div>');
-            },
-        	error : function(request,status,error){
-    			console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-        	}
-    	});
-    });
-    
 });
 
 $("#submit").click(function(){
-	
-	if('<%=type%>' == 'multi' && makefile == 1){
-		saveMakeFile();
-	}
 	
 	for(var i = 1; i <= previousTestCase; i++){
 		$.ajax({
@@ -290,9 +270,6 @@ function next(){
 	max_fields = 21 - x;
 	document.getElementById("addSign").innerHTML = previousTestCase + "개의 테스트 케이스가 저장되었습니다. <br> 최대 " + (20-previousTestCase) + "개의 테스트 케이스를 더 추가할 수 있습니다.";
 	document.getElementById("buttons").style.display = "block";
-	if("<%=type%>" == "single"){
-		document.getElementById("reviseMakefile").style.display = "none";
-	}
 	document.getElementById("toAdd").type = "hidden";
 	document.getElementById("deleteSign").style.display = "none";
 	for(var i = 1; i <= previousTestCase; i++){
@@ -321,34 +298,6 @@ function save(txtType, j){
     	    	dataType:'text',
     	    	type:'POST',
     	    	data:{'data':content, 'fileName':txtType + (j-1) + '.txt', 'uploadPath':'<%=uploadPath%>/' + txtType},
-    	    	success : function(){
-    	    		
-    	        },
-    	    	error : function(request,status,error){
-    				console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-    	    	}
-    		});
-    		
-    	}
-    	reader.onerror = function (evt) {
-    		alert("파일을 읽는데 에러가 발생했습니다.");
-    	}
-	}
-}
-
-function saveMakeFile(){
-	var txtfile = document.getElementById('makefile').files[0];
-	if (txtfile) {
-    	var reader = new FileReader();
-    	reader.readAsText(txtfile, "UTF-8");
-    	reader.onload = function (evt) {
-    		content = evt.target.result;
-    		
-    		$.ajax({
-    	    	url:'save.jsp',
-    	    	dataType:'text',
-    	    	type:'POST',
-    	    	data:{'data':content, 'fileName':'Makefile', 'uploadPath':'<%=uploadPath%>/'},
     	    	success : function(){
     	    		
     	        },

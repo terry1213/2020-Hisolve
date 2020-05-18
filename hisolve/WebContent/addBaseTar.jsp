@@ -91,7 +91,7 @@
 				</div>
 				<div class="form-group">
 					<button type="button" onclick="multi();" class="btn btn-info btn-sm">등록</button>
-					<button onclick="history.back();" class="btn btn-info btn-sm">취소</button>
+					<button type="button" onclick="history.back();" class="btn btn-info btn-sm">취소</button>
 				</div>						
 				
 				<input name="uploadPath" id="uploadPath" type="hidden" required value="<%=uploadPath%>">

@@ -48,7 +48,7 @@
 <body>
 
 	<script>
-		if(sessionStorage.getItem("allowed")!="professorPage.jsp" && sessionStorage.getItem("allowed")!="addTestCase.jsp"){
+		if(sessionStorage.getItem("allowed")!="professorPage.jsp" && sessionStorage.getItem("allowed")!="addTestCase.jsp" && sessionStorage.getItem("allowed")!="addBaseTar.jsp"){
 			alert("잘못된 접근입니다.");
 			history.back();
 		}
