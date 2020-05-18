@@ -5,17 +5,40 @@
 <%
 	String uploadPath = request.getParameter("uploadPath");
 
-	File f1 = new File(uploadPath + "/build");
-	if(!f1.exists()){
-	if(f1.mkdirs()){
+	class Directory{
+		public Directory(){}
+		public boolean deleteAll(File dir) {
+			if (!dir.exists()) {
+				return true;
+			}
+			boolean res = true;
+			if (dir.isDirectory()) {
+				File[] files = dir.listFiles();
+				for (int i = 0; i < files.length; i++) {
+				res &= deleteAll(files[i]);
+				}
+			}
+			else {
+				res = dir.delete();
+			}
+			dir.delete();
+			return res;
 		}
 	}
+
+	Directory d = new Directory();
+
+	File f1 = new File(uploadPath + "/build");
+	if(f1.exists()){
+		d.deleteAll(f1);
+	}
+	f1.mkdirs();
 	
 	File f2 = new File(uploadPath + "/input");
-	if(!f2.exists()){
-	if(f2.mkdirs()){
-		}
+	if(f2.exists()){
+		d.deleteAll(f2);
 	}
+	f2.mkdirs();
 	
 	String problemName = request.getParameter("problemName");
 	String timeLimit = request.getParameter("timeLimit");
