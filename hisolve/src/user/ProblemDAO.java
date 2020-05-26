@@ -84,6 +84,21 @@ public class ProblemDAO {
 	      return -1;
 	   }
    
+   public int howmany2(String problemID) {
+	      String SQL = "SELECT COUNT(fileName) FROM REQUIREDFILE WHERE problemID = ?";
+	      try {
+	         pstmt = conn.prepareStatement(SQL);
+	         pstmt.setString(1, problemID);
+	         rs = pstmt.executeQuery();
+				if (rs.next()) {
+					return rs.getInt(1);
+				}
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
+	      return -1;
+	   }
+   
    public int[] keyinfo(String userID, int result) {
 	      String SQL = "SELECT problemID FROM PROBLEM WHERE userID = ?";
 	      int[] temp = new int[result];
@@ -115,6 +130,24 @@ public class ProblemDAO {
 	        	 temp[1] = rs.getString(2);
 	        	 temp[2] = rs.getString(3);
 	        	 temp[3] = rs.getString(4);
+	         }
+	         return temp;
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
+	      return null;
+	   }
+   
+   public String[] seeRequiredFile(int problemID, int result) {
+	      String SQL = "SELECT fileName FROM REQUIREDFILE WHERE problemID = ?";
+	      String temp[] = new String[result];
+	      try {
+	         pstmt = conn.prepareStatement(SQL);
+	         pstmt.setInt(1, problemID);
+	         rs = pstmt.executeQuery();
+	         
+	         while(rs.next()) {
+	        	 temp[0] = rs.getString(1);
 	         }
 	         return temp;
 	      } catch (Exception e) {

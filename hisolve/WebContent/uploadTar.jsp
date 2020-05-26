@@ -4,9 +4,10 @@ String fileName = "";
 String name = request.getParameter("name");
 String userID = request.getParameter("userID");
 String uploadPath = request.getSession().getServletContext().getRealPath("/upload") + '/' + userID + "/problem/test";
+String decompressionPath = uploadPath;
 
 if(name.equals("testForm")){
-	uploadPath += "/build";
+	decompressionPath += "/build";
 }
 
 try {
@@ -28,7 +29,7 @@ try {
 	fileName = assignedName;
 	
     Runtime rt = Runtime.getRuntime();
-    Process p = rt.exec("tar -xvf " +uploadPath+"/"+fileName+" -C "+uploadPath);
+    Process p = rt.exec("tar -xvf " +uploadPath+"/"+fileName+" -C "+decompressionPath);
     p.waitFor();
     
 } catch (Exception e) {

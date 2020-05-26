@@ -71,7 +71,7 @@
 		
 		int result1 = sessionDAO.howmany2(sessionInfo[0],sessionInfo[1]);
 		int temp[] = new int[result1];
-		String[][] show = new String[result1][4];
+		String[][] show = new String[result1][6];
 		
 		temp = sessionDAO.keyinfo2(sessionInfo[0],sessionInfo[1],result1);
 		
@@ -106,9 +106,19 @@
 			<a class="list-group-item" style="border: 1px solid lightgray; margin-bottom:10px; background-color:lightgray;">
 			<h4 class="list-group-item-heading" style="font-size : 25px;"> Problem Name : <%= show[i][2] %> / 진행 상황 : <%=correct%></h4>
 			<% 
-    			if(state.equals("right")){
+    			if(state.equals("right") && show[i][5].equals("single")){
     		%>
     			<button type="button" class="btn btn-primary" onclick="sendInfo(<%=show[i][0]%>, '<%=show[i][2]%>', <%=show[i][3]%>);">
+  					문제 풀기 <i class="fas fa-arrow-right"></i>
+				</button>
+			<% 
+    			}
+			%>
+			
+			<% 
+    			if(state.equals("right") && show[i][5].equals("multi")){
+    		%>
+    			<button type="button" class="btn btn-primary" onclick="sendInfo2(<%=show[i][0]%>, '<%=show[i][2]%>', <%=show[i][3]%>);">
   					문제 풀기 <i class="fas fa-arrow-right"></i>
 				</button>
 			<% 
@@ -143,9 +153,49 @@
 	$('#nav').load("nav.jsp?userName=" + sessionStorage.getItem("userName"));
 	
 	function sendInfo(problemID, problemName, timeLimit){
+		
 		var f = document.createElement("form");
 		f.setAttribute("method","post");
 		f.setAttribute("action","sendingPage.jsp");
+		document.body.appendChild(f);
+	
+		var i = document.createElement("input");
+		i.setAttribute("type","hidden");
+		i.setAttribute("name","problemID");
+		i.setAttribute("value",problemID);
+		f.appendChild(i);
+		
+		var j = document.createElement("input");
+		j.setAttribute("type","hidden");
+		j.setAttribute("name","problemName");
+		j.setAttribute("value",problemName);
+		f.appendChild(j);
+		
+		var k = document.createElement("input");
+		k.setAttribute("type","hidden");
+		k.setAttribute("name","timeLimit");
+		k.setAttribute("value",timeLimit);
+		f.appendChild(k);
+		
+		var l = document.createElement("input");
+		l.setAttribute("type","hidden");
+		l.setAttribute("name","sessionID");
+		l.setAttribute("value","<%=sessionInfo[4]%>");
+		f.appendChild(l);
+		
+		var m = document.createElement("input");
+		m.setAttribute("type","hidden");
+		m.setAttribute("name","userID");
+		m.setAttribute("value",sessionStorage.getItem("userID"));
+		f.appendChild(m);
+		
+		f.submit();
+	}
+	
+	function sendInfo2(problemID, problemName, timeLimit){
+		var f = document.createElement("form");
+		f.setAttribute("method","post");
+		f.setAttribute("action","multiSendingPage.jsp");
 		document.body.appendChild(f);
 	
 		var i = document.createElement("input");

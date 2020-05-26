@@ -76,7 +76,7 @@
 			<div class="form-group">
 					<label id="submitLabel" for="revise" style="display: none;"><strong>테스트가 통과되어 문제가 등록되었습니다.</strong></label>
 					<button id="submit" style="display: none;" class="btn btn-primary" onclick="submit()">완료</button>
-					<label id="reviseLabel" for="submit" style="display: none;"><strong>테스트 결과에 문제가 있습니다. input&output이나 샘플 프로그램을 수정해주세요.</strong></label>
+					<label id="reviseLabel" for="submit" style="display: none;"><strong>테스트 결과에 문제가 있습니다. 업로드한 파일을 확인 후 수정해주세요.</strong></label>
 					<button id="revise" style="display: none;" class="btn btn-primary" onclick="revise()">수정하기</button>
 			</div>
 		</div>
@@ -135,7 +135,12 @@
 		} */
 		
  		document.getElementById('postData').method = "post";
-		document.getElementById('postData').action = "reviseTestCase.jsp"
+		if("<%=type%>" == "multi"){
+			document.getElementById('postData').action = "addBaseTar.jsp"
+		}
+		else{
+			document.getElementById('postData').action = "reviseTestCase.jsp"
+		}
 		document.getElementById('postData').submit();
 		
 		function textDelete(l){
